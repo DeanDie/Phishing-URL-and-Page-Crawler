@@ -72,7 +72,7 @@ class UrlFeature(object):
 		return '<UrlFeature {}>'.format(self.url)
 
 	def __setattr__(self, name, value):
-		object.__setattr__(self, name, value)
+		# object.__setattr__(self, name, value)
 		if (name == 'url') and (value):
 			# url format is like: ‘scheme://netloc/path;params?query#fragment’
 			o = urlparse.urlparse(self.url)

@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 import dbHelper
 import requests
+import regex
 import re
+import multiprocessing
+from multiprocessing import Pool
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
 urlTable = list(dbHelper.fetchAll("whitelist"))
 
-pattern = []
-
-toDelete = []
+suffixPattern = re.compile(r"^http.*(?<=\.zip|\.rar|\.exe|\.apk|\.sis|sisx|\.jar|\.cab)$", re.I)
 
 headers = {
 	'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
@@ -24,31 +25,24 @@ headers = {
 
 lock = threading.Lock()
 def work(url):
-	global toDelete
 	if url[-1] == r'/':
 		url = url[:-1]
 
 	try:
-		data = requests.get(url, headers=headers)
+		data = requests.get(url, headers=headers, timeout=10)
 		print url, "Normal"
 	except Exception as e:
 		e = str(e.message)
 		# print str(e.message)
 		if (len(e) >= 15 and e[:15] == "Failed to parse") or (len(e) >= 11 and e[:11] == "Invalid URL"):
-			print url, "To Delete!"
-			lock.acquire()
-			toDelete.append(url)
-			if len(toDelete) == 20:
-				dbHelper.delete(toDelete)
-				print "Deleted!"
-				toDelete = []
-			lock.release()
+
+			dbHelper.deleteOne('whitelist', url)
 
 
-# pool = ThreadPoolExecutor(max_workers=100)
-# for url in urlTable:
-# 	url = url[0]
-# 	pool.submit(work, url)
+pool = ThreadPoolExecutor(max_workers=500)
+for url in urlTable:
+	url = url[0]
+	pool.submit(work, url)
 #
 # pool.shutdown(wait=True)
 #
@@ -71,6 +65,16 @@ def delSlash(tableName):
 			dbHelper.deleteOne(tableName, eachUrl)
 			print "OK"
 
-for tableName in ['blacklist', 'whitelist']:
-	delSlash(tableName)
-	print '##################################################'
+'''
+过滤下载文件URL
+'''
+def delInvalidSuffix(tableName):
+	url = dbHelper.fetchAll(tableName)
+	url = [eachUrl[0] for eachUrl in url]
+	for eachUrl in url:
+		print eachUrl
+		if re.match(suffixPattern, eachUrl):
+			dbHelper.deleteOne(tableName, eachUrl)
+			print 'Deleted!'
+
+# delInvalidSuffix('whitelist')
