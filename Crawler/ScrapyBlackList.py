@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import threading
 from concurrent.futures import ThreadPoolExecutor
 import re
-import dbHelper
+from phishingDao import urlDB
 
 
 headers = {"User-Agent": "Mozilla/6.0 (Windows NT 7.1 WOW64) AppleWebKit/"}
@@ -51,7 +51,7 @@ def eachPage(i):
 					print blackUrl
 			if urlList != []:
 				lock.acquire()
-				dbHelper.insertBlacklist(urlList)
+				urlDB.insertBlacklist(urlList)
 				lock.release()
 
 if __name__ == '__main__':

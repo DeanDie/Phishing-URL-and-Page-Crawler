@@ -1,6 +1,12 @@
 # -*- coding:utf-8 -*-
 import pymysql
 
+
+"""
+黑白名单表操作
+"""
+
+
 def connect():
     conn = pymysql.connect(
         host='localhost',
@@ -10,6 +16,15 @@ def connect():
         charset='utf8'
     )
     return conn
+
+def connectRemote():
+	conn = pymysql.connect(
+		host='10.1.1.181',
+		user='mokun',
+		passwd='secsmarts',
+		db='webspyder',
+		charset='utf8'
+	)
 
 def insert(infolist):
 	conn = connect()

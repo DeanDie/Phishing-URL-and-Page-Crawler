@@ -2,7 +2,7 @@
 # coding=utf-8
 
 import requests
-import dbHelper
+from phishingDao import urlDB
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
@@ -38,7 +38,7 @@ def eachDomain(singerUrl):
 	siteName = singerUrl["AppName"]
 	className = singerUrl["KclassName"]
 	table.append([domain, siteName, className])
-	# dbHelper.insert('whitelist', table)
+	# urlDB.insert('whitelist', table)
 
 	headersDomain = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/"}
 	try:
@@ -81,7 +81,7 @@ def eachDomain(singerUrl):
 	if len(url) > 0:
 		lock.acquire()
 		print domain, len(url)
-		dbHelper.insert(url)
+		urlDB.insert(url)
 		lock.release()
 
 # for singerUrl in jsonData:
@@ -92,7 +92,7 @@ data = []
 
 for singerUrl in jsonData:
 	data.append("http://" + singerUrl["Domain"])
-dbHelper.insert(data)
+urlDB.insert(data)
 
 pool = ThreadPoolExecutor(max_workers=200)
 for singerUrl in jsonData:

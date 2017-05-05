@@ -1,14 +1,48 @@
-import urlparse
-import re
+#coding:utf-8
+import requests
+from bs4 import BeautifulSoup
+import chardet
+import urllib2
 
-url = 'http://active.yueyin99.com/20170427ppbs/index.html'
-print urlparse.urlparse(url)
+url = "http://007swz.com"
 
-url = 'http://69.46.86.252/max/3dsmax2014chinese-english64bit.rar'
-print urlparse.urlparse(url)
+headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_0) AppleWebK Gecko) Chrome/54.0.2840.98 Safari/537.36'
+	}
 
-pre_suffixPattern = re.compile(r"^http.*(?<!css|\.js|ico|png|gif|jpg|png|xml)$", re.I)
-print re.match(pre_suffixPattern, url)
+# r = urllib2.urlopen(url, timeout=10).read()
+#
+# encoding_dict = chardet.detect(r)
+#
+# web_encoding = encoding_dict['encoding']
+# if web_encoding == 'utf-8' or web_encoding == 'UTF-8':
+#
+# 	html = r
+# else:
+# 	html = r.decode('gbk', 'ignore').encode('utf-8')
+html = requests.get(url, headers).content
 
-suffixPattern = re.compile(r"^http.*(?<=\.zip|\.rar|\.exe|\.apk|\.sis|sisx|\.jar|\.cab)$", re.I)
-print True if re.match(suffixPattern, url) else False
+str_type = chardet.detect(html)
+code = str_type['encoding']
+print code
+if code == 'utf-8' or code == 'UTF-8':
+
+	html = html
+else:
+	html = html.decode('gbk', 'ignore').encode('utf-8')
+
+soup = BeautifulSoup(html, 'html.parser')
+
+title = ""
+
+# print r.encoding
+
+title = soup.title if (soup.title) else ""
+print title
+
+content = soup.body.text
+print content
+
+print title
+title = title.decode('utf8')
+
+print title
